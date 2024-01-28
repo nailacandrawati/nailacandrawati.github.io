@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Kesesuaian Lokasi TPA</title>
+    <link rel="stylesheet" href="library/leaflet/leaflet.css" />
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="library/leaflet/leaflet.js"></script>
+    <script src="library/leaflet-providers-master/leaflet-providers.js"></script>
+    <script src="library/jquery.min.js"></script>
+</head>
+
+<body>
+    <div id="map">
+        <script>
+            var map = L.map('map').setView([-7.810789969242717, 110.4713488360319], 14);
+
+            var baseLayers = {
+                'Esri WorldTopoMap': L.tileLayer.provider('Esri.WorldTopoMap'),
+                'Esri WorldImagery': L.tileLayer.provider('Esri.WorldImagery').addTo(map),
+                'OSM Default': L.tileLayer.provider('OpenStreetMap.DE'),
+                'OSM France': L.tileLayer.provider('OpenStreetMap.France')
+            };
+
+
+            /* Memanggil Layer Rawan Banjir */
+            var Rasterpolygon = L.geoJson(null, {
+                style: function(feature) {
+                    return {
+                        color: "black",
+                        fillColor: KlasTPA[feature.properties.Klas_TPA],
+                        weight: 0.3,
+                        opacity: 0,
+                        fillOpacity: 0.6
+                    };
+                },
+                onEachFeature: function( feature, layer ){
+                    layer.bindPopup(
+                        "Klas Kesesuaian : " + "<left>" + feature.properties.Klas_TPA + "</left>" + "<br>" +
+                        "Luas :" + "<left>" + feature.properties.Luas + "</left>" + " m2"
+                        )
+                }
+            });
+            $.getJSON("data/TPA.json", function(data) {
+                Rasterpolygon.addData(data);
+            });
+
+			/* Merubah Tampilan Warna Berdasar Atribut Klas Banjir */
+			var KlasTPA = {
+				"Sangat Tidak Sesuai":"#FBE9E7",
+				"Tidak Sesuai":"#FF8A65",
+				"Kurang Sesuai":"#FF7043",
+				"Sesuai":"#F4511E",
+				"Sangat Sesuai":"#E64A19"
+			};
+
+            var mapLayers = {
+                'Kesesuaian Lokasi TPA': Rasterpolygon
+            };
+
+            L.control.layers(baseLayers, mapLayers).addTo(map);
+        </script>
+    </div>
+</body>
+
+</html>
